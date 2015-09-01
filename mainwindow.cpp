@@ -256,11 +256,116 @@ void MainWindow::on_actionAbout_triggered()
     ui->statusBar->showMessage(tr("关于HwFinger"));
 }
 
+char readbuf[8];
+
 //读取数据
 void MainWindow::readMyCom()
 {
     QByteArray temp = myCom->readAll();
     QString buf;
+    int i=0;
+    static unsigned char Readlen = 0;
+
+
+    for(i=0;i<temp.length();i++)
+    {
+        readbuf[Readlen+i] = temp[i];
+    }
+
+    Readlen += temp.length();
+    qDebug("temp len==%d\r\n",temp.length());
+    if(Readlen == 8)
+    {
+       //获取指纹枚数
+       if(readbuf[2] == 0x01)
+       {
+           qDebug("Number of finger==%d\r\n",readbuf[4]);
+           //ui->statusBar->showMessage(tr("一共有%2枚指纹").arg(&readbuf[4]));
+
+           buf = QString::number(readbuf[4], 10);
+
+           ui->sendAsHexcheckBox->setEnabled(true);
+           ui->sendAsHexcheckBox->setText(tr("指纹枚数共："));
+
+           ui->sendMsgLineEdit->setEnabled(true);
+           ui->sendMsgLineEdit->setText(buf);
+
+           ui->textBrowser->setTextColor(Qt::black);
+           ui->textBrowser->setText(ui->textBrowser->document()->toPlainText() + buf);//fromAscii(&readbuf[4])
+           QTextCursor cursor = ui->textBrowser->textCursor();
+           cursor.movePosition(QTextCursor::End);
+           cursor.movePosition(QTextCursor::Down);
+           ui->textBrowser->setTextCursor(cursor);
+       }
+       //验证
+       if(readbuf[2] == 0x05)
+       {
+          if(readbuf[4] == 0x06)
+          {
+              ui->statusBar->showMessage(tr("验证指纹成功"));
+          }
+          if(readbuf[4] == 0x07)
+          {
+              ui->statusBar->showMessage(tr("验证指纹失败"));
+          }
+       }
+       //删除全部
+       if(readbuf[2] == 0x03)
+       {
+          if(readbuf[4] == 0x08)
+          {
+              ui->statusBar->showMessage(tr("删除全部成功"));
+          }
+          if(readbuf[4] == 0x09)
+          {
+              ui->statusBar->showMessage(tr("删除全部失败"));
+          }
+       }
+       //删除单个指纹
+       if(readbuf[2] == 0x02)
+       {
+          if(readbuf[4] == 0x08)
+          {
+              ui->statusBar->showMessage(tr("删除成功"));
+          }
+          if(readbuf[4] == 0x09)
+          {
+              ui->statusBar->showMessage(tr("删除失败"));
+          }
+       }
+
+
+       //指纹注册
+       if(readbuf[2] == 0x04)
+       {
+          if(readbuf[4] == 0x0d)
+          {
+              ui->statusBar->showMessage(tr("指纹图像有误，重新按压"));
+          }
+          if(readbuf[4] == 0x0b)
+          {
+              ui->statusBar->showMessage(tr("请按压第二次"));
+          }
+          if(readbuf[4] == 0x0c)
+          {
+              ui->statusBar->showMessage(tr("请按压第三次"));
+          }
+          if(readbuf[4] == 0x08)
+          {
+              ui->statusBar->showMessage(tr("指纹注册成功"));
+          }
+          if(readbuf[4] == 0x09)
+          {
+              ui->statusBar->showMessage(tr("指纹注册失败"));
+          }
+       }
+
+       Readlen = 0;
+    }
+
+
+
+/*
 
     if(!temp.isEmpty())
     {
@@ -301,7 +406,7 @@ void MainWindow::readMyCom()
         ui->recvbyteslcdNumber->display(ui->recvbyteslcdNumber->value() + temp.size());
         ui->statusBar->showMessage(tr("成功读取%1字节数据").arg(temp.size()));
     }
-
+*/
 
 }
 
@@ -630,7 +735,8 @@ void MainWindow::on_Btn_EnrollOne_clicked()
 
     //发送数据
     myCom->write(buf);
-    ui->statusBar->showMessage(tr("发送数据成功"));
+    //->statusBar->showMessage(tr("发送数据成功"));
+    ui->statusBar->showMessage(tr("请按压第一次"));
     //界面控制
     ui->textBrowser->setTextColor(Qt::lightGray);
 }
