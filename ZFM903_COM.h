@@ -1,154 +1,155 @@
-#ifndef _ZFM903_COM_H_
-#define _ZFM903_COM_H_
+#ifndef ZFM903_COM_H
+#define ZFM903_COM_H
 
-// ÀàĞÍ¶¨Òå
+
+// ç±»å‹å®šä¹‰
 #define   uchar                 unsigned char
 #define   uint                  unsigned  int
 #define   ulong                 unsigned long
 
-typedef union 
+typedef union
 {
-	unsigned int word;
-	struct double_byte
-	{
-		unsigned char low;
-		unsigned char high;
-	}byte;
+    unsigned int word;
+    struct double_byte
+    {
+        unsigned char low;
+        unsigned char high;
+    }byte;
 }my_word;
 
-typedef union 
+typedef union
 {
-	unsigned int word;
-	struct double_word
-	{
-		unsigned char low1;
-		unsigned char low2;
-		unsigned char high1;
-		unsigned char high2;
-	}byte;
+    unsigned int word;
+    struct double_word
+    {
+        unsigned char low1;
+        unsigned char low2;
+        unsigned char high1;
+        unsigned char high2;
+    }byte;
 }DOUBLE_WORD;
 
 
 typedef struct _fp_match
 {
-	unsigned char ack;
-	unsigned short id;
-	unsigned short score;
+    unsigned char ack;
+    unsigned short id;
+    unsigned short score;
 }fp_match;
 
 
 
 
-// ·µ»ØÖµ³£Êı¶¨Òå
+// è¿”å›å€¼å¸¸æ•°å®šä¹‰
 #define   FALSE                 0x00
 #define   TRUE                  0x01
 #define   OVER_TIME_S		0xfe
 #define   OVER_TIME_R		0xfd
 
 
-// Ê±¼ä³£Êı¶¨Òå
+// æ—¶é—´å¸¸æ•°å®šä¹‰
 #define	  T_300MS		30
 #define	  T_500MS		50
 #define   T_1S			100
 #define   T_5S			500
 
 
-// Ö¸ÎÆÄ£¿éÏà¹Ø³£Êı¶¨Òå
-//FG_STATUSÖ¸ÎÆ¹¤×÷×´Ì¬
-#define  FG_NONE                0               // ´ı»ú
-#define  FG_ADD                 1               // ×¢²á
-#define  FG_SEA                 2               // ËÑË÷
-#define  FG_DEL                 3               // É¾³ı
+// æŒ‡çº¹æ¨¡å—ç›¸å…³å¸¸æ•°å®šä¹‰
+//FG_STATUSæŒ‡çº¹å·¥ä½œçŠ¶æ€
+#define  FG_NONE                0               // å¾…æœº
+#define  FG_ADD                 1               // æ³¨å†Œ
+#define  FG_SEA                 2               // æœç´¢
+#define  FG_DEL                 3               // åˆ é™¤
 
 
-//ÃüÁî´úÂë±í
+//å‘½ä»¤ä»£ç è¡¨
 
-#define   CMD_ECHO      0x16//0x53   //ÎÕÊÖ
-
-
-#define   CMD_GET_IMAGE      0x01   //Â¼Ö¸ÎÆÍ¼Ïñ
-//#define   CMD_ENROLL		0x10		// ¿ªÊ¼Ö¸ÎÆ×¢²á
-
-#define   CMD_IMG2TZ		0x02		// Í¼Ïñ×ªÌØÕ÷
-#define   CMD_MATCH		0x03		// ¶Ô±ÈÌØÕ÷
-#define   CMD_SERACH		0x04		// ËÑË÷Ö¸ÎÆ
-#define   CMD_REG_MODEL      0x05   //ÌØÕ÷ºÏ³ÉÄ£°å
-#define   CMD_STORE		0x06		// ´æ´¢Ä£°å
-#define   CMD_LOAD_CHAR		0x07		// ¶Á³öÄ£°å
-#define   CMD_UP_CHAR		0x08		// ÉÏ´«ÌØÕ÷
-#define   CMD_DOWN_CHAR		0x09		// ÏÂÔØÌØÕ÷
-#define   CMD_UP_IMAGE      0x0a   //ÉÏ´«Í¼Ïñ
-#define   CMD_DOWN_IMAGE      0x0b   //ÏÂÔØÍ¼Ïñ
-#define   CMD_DEL_CHAR		0x0c		// É¾³ıÄ£°å
-#define   CMD_CLEAR_ALL_TEMPLATE		0x0d		// Çå¿ÕÖ¸ÎÆ¿â
-#define   CMD_SET_SYS		0x0e		// ÉèÖÃÏµÍ³²ÎÊı
-#define   CMD_READ_SYS		0x0f		// ¶ÁÏµÍ³²ÎÊı
-#define   CMD_SET_PWD		0x12		// ÉèÖÃ¿ÚÁî
-#define   CMD_VFY_PWD		0x13		//Ğ£Ñé¿ÚÁî
-#define   CMD_GET_RANDOM		0x14		//²ÉÑùËæ»úÊı
-#define   CMD_SET_ADDR		0x15		//ÉèÖÃµØÖ·
-
-#define   CMD_WR_NOTEPAD		0x18		//Ğ´¼ÇÊÂ±¾
-#define   CMD_RD_NOTEPAD		0x19		//¶Á¼ÇÊÂ±¾
+#define   CMD_ECHO      0x16//0x53   //æ¡æ‰‹
 
 
-#define   CMD_GET_TEMPLATE_NUM      0x1d   //¶ÁÖ¸ÎÆÄ£°åÊı
-#define   CMD_READ_TEMPLATE_LIST      0x1f   //¶ÁÖ¸ÎÆÄ£°åË÷Òı±í
+#define   CMD_GET_IMAGE      0x01   //å½•æŒ‡çº¹å›¾åƒ
+//#define   CMD_ENROLL		0x10		// å¼€å§‹æŒ‡çº¹æ³¨å†Œ
+
+#define   CMD_IMG2TZ		0x02		// å›¾åƒè½¬ç‰¹å¾
+#define   CMD_MATCH		0x03		// å¯¹æ¯”ç‰¹å¾
+#define   CMD_SERACH		0x04		// æœç´¢æŒ‡çº¹
+#define   CMD_REG_MODEL      0x05   //ç‰¹å¾åˆæˆæ¨¡æ¿
+#define   CMD_STORE		0x06		// å­˜å‚¨æ¨¡æ¿
+#define   CMD_LOAD_CHAR		0x07		// è¯»å‡ºæ¨¡æ¿
+#define   CMD_UP_CHAR		0x08		// ä¸Šä¼ ç‰¹å¾
+#define   CMD_DOWN_CHAR		0x09		// ä¸‹è½½ç‰¹å¾
+#define   CMD_UP_IMAGE      0x0a   //ä¸Šä¼ å›¾åƒ
+#define   CMD_DOWN_IMAGE      0x0b   //ä¸‹è½½å›¾åƒ
+#define   CMD_DEL_CHAR		0x0c		// åˆ é™¤æ¨¡æ¿
+#define   CMD_CLEAR_ALL_TEMPLATE		0x0d		// æ¸…ç©ºæŒ‡çº¹åº“
+#define   CMD_SET_SYS		0x0e		// è®¾ç½®ç³»ç»Ÿå‚æ•°
+#define   CMD_READ_SYS		0x0f		// è¯»ç³»ç»Ÿå‚æ•°
+#define   CMD_SET_PWD		0x12		// è®¾ç½®å£ä»¤
+#define   CMD_VFY_PWD		0x13		//æ ¡éªŒå£ä»¤
+#define   CMD_GET_RANDOM		0x14		//é‡‡æ ·éšæœºæ•°
+#define   CMD_SET_ADDR		0x15		//è®¾ç½®åœ°å€
+
+#define   CMD_WR_NOTEPAD		0x18		//å†™è®°äº‹æœ¬
+#define   CMD_RD_NOTEPAD		0x19		//è¯»è®°äº‹æœ¬
 
 
-#define CMD_UP_IMAGE_TEST    0x50     //ÉÏ´«Ö¸ÎÆÍ¼Æ¬£¬ÓÃÓÚ²âÊÔ
+#define   CMD_GET_TEMPLATE_NUM      0x1d   //è¯»æŒ‡çº¹æ¨¡æ¿æ•°
+#define   CMD_READ_TEMPLATE_LIST      0x1f   //è¯»æŒ‡çº¹æ¨¡æ¿ç´¢å¼•è¡¨
 
 
-#define   CMD_ALOGIN		0x54		// ×Ô¶¯×¢²á
+#define CMD_UP_IMAGE_TEST    0x50     //ä¸Šä¼ æŒ‡çº¹å›¾ç‰‡ï¼Œç”¨äºæµ‹è¯•
 
 
-
-//Ó¦´ğÈ·ÈÏÂë±í
-#define   ERR_OK      0x00   //Ö¸ÁîÖ´ĞĞÍê±Ï»òOK
-#define   ERR_DATA_ERR      0x01   //Êı¾İ°ü½ÓÊÕ´íÎó
-#define   ERR_NO_DETECT_FINGER      0x02   //´«¸ĞÆ÷ÉÏÃ»ÓĞÊÖÖ¸
-#define   ERR_GET_IMAGE      0x03   //Â¼ÈëÖ¸ÎÆÍ¼ÏñÊ§°Ü
-
-#define   ERR_IMG2TZ1      0x06   //Ö¸ÎÆÍ¼ÏñÌ«ÂÒ¶øÉú²»³ÉÌØÕ÷
-#define   ERR_IMG2TZ2      0x07   //Ö¸ÎÆÍ¼ÏñÕı³££¬µ«ÌØÕ÷Ì«ÉÙ¶øÉú²»³ÉÌØÕ÷
-#define   ERR_MATCH      0x08   //Ö¸ÎÆ²»Æ¥Åä
-#define   ERR_SERACH      0x09   //Ã»ËÑË÷µ½Ö¸ÎÆ
-#define   ERR_REG_MODEL      0x0a   //ÌØÕ÷ºÏ²¢Ê§°Ü
-#define   ERR_GET_TEMPLATE_NUM      0x0b   //·ÃÎÊÖ¸ÎÆ¿âÊ±µØÖ·ĞòºÅ³¬³öÖ¸ÎÆ¿â·¶Î§¡£
-#define   ERR_LOAD_CHAR      0x0c   //´ÓÖ¸ÎÆ¿â¶ÁÄ£°å³ö´í»òÎŞĞ§¡£
-#define   ERR_UP_CHAR      0x0d   //ÉÏ´«ÌØÕ÷Ê§°Ü
-#define   ERR_RECV_DATA      0x0e   //Ä£¿é²»ÄÜ½ÓÊÜºóĞøÊı¾İ°ü
-#define   ERR_UP_IMAGE      0x0f   //ÉÏ´«Í¼ÏñÊ§°Ü
-#define   ERR_DEL_CHAR      0x10   //É¾³ıÄ£°åÊ§°Ü
-#define   ERR_CLEAR_ALL_TEMPLATE      0x11   //Çå¿ÕÖ¸ÎÆ¿âÊ§°Ü
-#define   ERR_VFY_PWD      0x13   //¿ÚÁî²»¶Ô
-#define   ERR_IMAGE      0x15   //»º³åÇøÄÚÃ»ÓĞÓĞĞ§Ô­Ê¼Í¼¶øÉú²»³ÉÍ¼Ïñ
-#define   ERR_FLASH      0x18   //¶ÁĞ´FLASH³ö´í
-#define   ERR_REG      0x1a   //ÎŞĞ§¼Ä´æÆ÷ºÅ
-#define   ERR_ADDR      0x20   //µØÖ·Âë´íÎó
-#define   ERR_INPUT_PWD      0x21   //±ØĞëÑéÖ¤¿ÚÁî
+#define   CMD_ALOGIN		0x54		// è‡ªåŠ¨æ³¨å†Œ
 
 
 
+//åº”ç­”ç¡®è®¤ç è¡¨
+#define   ERR_OK      0x00   //æŒ‡ä»¤æ‰§è¡Œå®Œæ¯•æˆ–OK
+#define   ERR_DATA_ERR      0x01   //æ•°æ®åŒ…æ¥æ”¶é”™è¯¯
+#define   ERR_NO_DETECT_FINGER      0x02   //ä¼ æ„Ÿå™¨ä¸Šæ²¡æœ‰æ‰‹æŒ‡
+#define   ERR_GET_IMAGE      0x03   //å½•å…¥æŒ‡çº¹å›¾åƒå¤±è´¥
 
-#define   RBUF_LEN		16		// ´®¿Ú½ÓÊÕ»º´æ³¤¶È
-#define   FG_MAX		29		// Ê¹ÓÃÖ¸ÎÆÄ£°å×î´óÊı
+#define   ERR_IMG2TZ1      0x06   //æŒ‡çº¹å›¾åƒå¤ªä¹±è€Œç”Ÿä¸æˆç‰¹å¾
+#define   ERR_IMG2TZ2      0x07   //æŒ‡çº¹å›¾åƒæ­£å¸¸ï¼Œä½†ç‰¹å¾å¤ªå°‘è€Œç”Ÿä¸æˆç‰¹å¾
+#define   ERR_MATCH      0x08   //æŒ‡çº¹ä¸åŒ¹é…
+#define   ERR_SERACH      0x09   //æ²¡æœç´¢åˆ°æŒ‡çº¹
+#define   ERR_REG_MODEL      0x0a   //ç‰¹å¾åˆå¹¶å¤±è´¥
+#define   ERR_GET_TEMPLATE_NUM      0x0b   //è®¿é—®æŒ‡çº¹åº“æ—¶åœ°å€åºå·è¶…å‡ºæŒ‡çº¹åº“èŒƒå›´ã€‚
+#define   ERR_LOAD_CHAR      0x0c   //ä»æŒ‡çº¹åº“è¯»æ¨¡æ¿å‡ºé”™æˆ–æ— æ•ˆã€‚
+#define   ERR_UP_CHAR      0x0d   //ä¸Šä¼ ç‰¹å¾å¤±è´¥
+#define   ERR_RECV_DATA      0x0e   //æ¨¡å—ä¸èƒ½æ¥å—åç»­æ•°æ®åŒ…
+#define   ERR_UP_IMAGE      0x0f   //ä¸Šä¼ å›¾åƒå¤±è´¥
+#define   ERR_DEL_CHAR      0x10   //åˆ é™¤æ¨¡æ¿å¤±è´¥
+#define   ERR_CLEAR_ALL_TEMPLATE      0x11   //æ¸…ç©ºæŒ‡çº¹åº“å¤±è´¥
+#define   ERR_VFY_PWD      0x13   //å£ä»¤ä¸å¯¹
+#define   ERR_IMAGE      0x15   //ç¼“å†²åŒºå†…æ²¡æœ‰æœ‰æ•ˆåŸå§‹å›¾è€Œç”Ÿä¸æˆå›¾åƒ
+#define   ERR_FLASH      0x18   //è¯»å†™FLASHå‡ºé”™
+#define   ERR_REG      0x1a   //æ— æ•ˆå¯„å­˜å™¨å·
+#define   ERR_ADDR      0x20   //åœ°å€ç é”™è¯¯
+#define   ERR_INPUT_PWD      0x21   //å¿…é¡»éªŒè¯å£ä»¤
 
-#define   FG_2X   		0		// Ö¸°²20ÏµÁĞÄ£¿é
-#define   FG_6X   		1		// Ö¸°²60¡¢70ÏµÁĞÄ£¿é
 
-#define   FG_TPYE		FG_6X		// Ö¸°²Ä£¿éÏµÁĞÑ¡Ôñ£¬Ö»ÄÜÑ¡ÔñFG_2X»òÕßFG_6X
+
+
+#define   RBUF_LEN		16		// ä¸²å£æ¥æ”¶ç¼“å­˜é•¿åº¦
+#define   FG_MAX		29		// ä½¿ç”¨æŒ‡çº¹æ¨¡æ¿æœ€å¤§æ•°
+
+#define   FG_2X   		0		// æŒ‡å®‰20ç³»åˆ—æ¨¡å—
+#define   FG_6X   		1		// æŒ‡å®‰60ã€70ç³»åˆ—æ¨¡å—
+
+#define   FG_TPYE		FG_6X		// æŒ‡å®‰æ¨¡å—ç³»åˆ—é€‰æ‹©ï¼Œåªèƒ½é€‰æ‹©FG_2Xæˆ–è€…FG_6X
 #if (FG_TPYE == FG_2X)
-    #define FG_GETIMG_5S   	0x1c 		// 20ÏµÁĞ²É¼¯Í¼Ïñ5Ãë³¬Ê±»ùÊı(ÓĞĞ§È¡ÖµÎª1~255)
+    #define FG_GETIMG_5S   	0x1c 		// 20ç³»åˆ—é‡‡é›†å›¾åƒ5ç§’è¶…æ—¶åŸºæ•°(æœ‰æ•ˆå–å€¼ä¸º1~255)
 #elif (FG_TPYE == FG_6X)
-    #define FG_GETIMG_5S	0x4d 		// 60¡¢70ÏµÁĞ²É¼¯Í¼Ïñ5Ãë³¬Ê±»ùÊı(ÓĞĞ§È¡ÖµÎª1~255)
+    #define FG_GETIMG_5S	0x4d 		// 60ã€70ç³»åˆ—é‡‡é›†å›¾åƒ5ç§’è¶…æ—¶åŸºæ•°(æœ‰æ•ˆå–å€¼ä¸º1~255)
 #endif
 
-#define   FG_GETIMG_CNT   	2 		// ×Ô¶¯×¢²á´ıÖ¸´ÎÊı£¬Ö»ÄÜÉèÖÃÎª2»ò3
+#define   FG_GETIMG_CNT   	2 		// è‡ªåŠ¨æ³¨å†Œå¾…æŒ‡æ¬¡æ•°ï¼Œåªèƒ½è®¾ç½®ä¸º2æˆ–3
 
 
-// Íâµ÷º¯Êı¶¨Òå
+// å¤–è°ƒå‡½æ•°å®šä¹‰
 
 
+#endif // ZFM903_COM_H
 
-#endif

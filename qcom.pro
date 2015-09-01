@@ -16,12 +16,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     aboutdialog.cpp \
-        qextserial/qextserialport.cpp
+        qextserial/qextserialport.cpp \
+    zfm903_com.cpp
 
 HEADERS  += mainwindow.h \
     aboutdialog.h \
         qextserial/qextserialport_global.h \
-        qextserial/qextserialport.h
+        qextserial/qextserialport.h \
+    zfm903_com.h
 
 win32 {
      SOURCES += qextserial/qextserialport_win.cpp

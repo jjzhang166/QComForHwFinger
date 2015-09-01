@@ -279,8 +279,7 @@ void MainWindow::readMyCom()
        //获取指纹枚数
        if(readbuf[2] == 0x01)
        {
-           qDebug("Number of finger==%d\r\n",readbuf[4]);
-           //ui->statusBar->showMessage(tr("一共有%2枚指纹").arg(&readbuf[4]));
+           //qDebug("Number of finger==%d\r\n",readbuf[4]);
 
            buf = QString::number(readbuf[4], 10);
 
@@ -289,13 +288,14 @@ void MainWindow::readMyCom()
 
            ui->sendMsgLineEdit->setEnabled(true);
            ui->sendMsgLineEdit->setText(buf);
-
+/*
            ui->textBrowser->setTextColor(Qt::black);
            ui->textBrowser->setText(ui->textBrowser->document()->toPlainText() + buf);//fromAscii(&readbuf[4])
            QTextCursor cursor = ui->textBrowser->textCursor();
            cursor.movePosition(QTextCursor::End);
            cursor.movePosition(QTextCursor::Down);
            ui->textBrowser->setTextCursor(cursor);
+*/
        }
        //验证
        if(readbuf[2] == 0x05)
