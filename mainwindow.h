@@ -35,6 +35,9 @@ public:
     ~MainWindow();
     void startInit();
 
+    int Com_Send(char *p,uint len);
+    uint ZFM_GetSum(uchar *p,uint len);
+
 protected:
     void changeEvent(QEvent *e);
     void setActionsEnabled(bool status);
@@ -50,6 +53,8 @@ private:
     QString write2fileName;    //写读取的串口数据到该文件
 
     unsigned char openSerialPortFlag;//串口是否打开标志  打开==1  没打开==0
+
+    char ZFM_SendBuf[1024];
 
 private slots:
 
@@ -76,6 +81,11 @@ private slots:
     void on_Btn_DelOne_clicked();
     void on_Btn_DelAll_clicked();
     void on_Btn_EnrollOne_clicked();
+    void on_Btn_VfyPwd_clicked();
+    void on_Btn_GetTemplateNum_clicked();
+    void on_pushButton_clicked();
+    void on_pushButton_5_clicked();
+    void on_pushButton_6_clicked();
 };
 
 #endif // MAINWINDOW_H

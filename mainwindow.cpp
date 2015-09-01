@@ -3,6 +3,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "zfm903_com.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -58,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->ccradioButton->setDisabled(true);
     //ui->ccradioButton->setCheckable(true);
     //ui->ccradioButton->setChecked(true);
+    ui->actionClearBytes->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -203,8 +206,9 @@ void MainWindow::on_actionOpen_triggered()
         ui->actionSave->setEnabled(false);
         //ui->actionClose->setEnabled(status);
         ui->actionLoadfile->setEnabled(false);
-        //ui->actionCleanPort->setEnabled(status);
+        //ui->actionCleanPort->setEnabled(false);
         ui->actionWriteToFile->setEnabled(false);
+        ui->actionClearBytes->setEnabled(false);
 
         openSerialPortFlag = 1;
 
@@ -266,7 +270,7 @@ void MainWindow::readMyCom()
     int i=0;
     static unsigned char Readlen = 0;
 
-
+/*
     for(i=0;i<temp.length();i++)
     {
         readbuf[Readlen+i] = temp[i];
@@ -288,14 +292,7 @@ void MainWindow::readMyCom()
 
            ui->sendMsgLineEdit->setEnabled(true);
            ui->sendMsgLineEdit->setText(buf);
-/*
-           ui->textBrowser->setTextColor(Qt::black);
-           ui->textBrowser->setText(ui->textBrowser->document()->toPlainText() + buf);//fromAscii(&readbuf[4])
-           QTextCursor cursor = ui->textBrowser->textCursor();
-           cursor.movePosition(QTextCursor::End);
-           cursor.movePosition(QTextCursor::Down);
-           ui->textBrowser->setTextCursor(cursor);
-*/
+
        }
        //验证
        if(readbuf[2] == 0x05)
@@ -363,9 +360,9 @@ void MainWindow::readMyCom()
        Readlen = 0;
     }
 
+*/
 
 
-/*
 
     if(!temp.isEmpty())
     {
@@ -404,9 +401,9 @@ void MainWindow::readMyCom()
         ui->textBrowser->setTextCursor(cursor);
 
         ui->recvbyteslcdNumber->display(ui->recvbyteslcdNumber->value() + temp.size());
-        ui->statusBar->showMessage(tr("成功读取%1字节数据").arg(temp.size()));
+        ///ui->statusBar->showMessage(tr("成功读取%1字节数据").arg(temp.size()));
     }
-*/
+
 
 }
 
@@ -478,6 +475,16 @@ void MainWindow::on_clearUpBtn_clicked()
 {
     ui->textBrowser->clear();
     ui->statusBar->showMessage(tr("记录已经清空"));
+
+
+    if(ui->recvbyteslcdNumber->value() == 0)
+    {
+        //QMessageBox::information(this, tr("提示消息"), tr("貌似已经清零了呀:)"), QMessageBox::Ok);
+    }else
+    {
+        ui->recvbyteslcdNumber->display(0);
+        ui->statusBar->showMessage(tr("计数器已经清零"));
+    }
 }
 
 
@@ -739,4 +746,243 @@ void MainWindow::on_Btn_EnrollOne_clicked()
     ui->statusBar->showMessage(tr("请按压第一次"));
     //界面控制
     ui->textBrowser->setTextColor(Qt::lightGray);
+}
+
+
+int MainWindow::Com_Send(char *p,uint len)
+{
+    //QByteArray buf;
+    if(openSerialPortFlag == 0)
+    {
+        QMessageBox::critical(this, tr("打开失败"), tr("请首先打开可以使用的串口！"), QMessageBox::Ok);
+        return 0;
+    }
+    //发送数据
+    myCom->write(p,len);
+    ui->statusBar->showMessage(tr("发送数据成功"));
+    //界面控制
+    ui->textBrowser->setTextColor(Qt::lightGray);
+    return 1;
+}
+
+uint MainWindow::ZFM_GetSum(uchar *p,uint len)
+{
+    uchar i;
+    uint sum;
+
+    sum = *p;
+    for (i=1; i<len; i++)
+    {
+        sum += p[i];
+    }
+
+    return (sum);
+}
+
+
+
+//1）验证口令 VfyPwd
+//功能说明：验证模块口令（串行通讯必须进行的握手）。
+//输入参数：PassWord
+//返回参数：确认码
+//指令代码：0x13
+void MainWindow::on_Btn_VfyPwd_clicked()
+{
+
+    my_word sum;       // 校验和
+    char *buf=ZFM_SendBuf;
+
+    if(openSerialPortFlag == 0)
+    {
+        QMessageBox::critical(this, tr("打开失败"), tr("请首先打开可以使用的串口！"), QMessageBox::Ok);
+        return ;
+    }
+    // 以下判断表示不处理非应答包数据
+    buf[0] = 0xef;                          // 包头错误
+    buf[1] = 0x01;                          // 包头错误
+
+    //★ 默认模块地址为“0xffffffff”
+    buf[2] = 0xff;                          // 模块地址错误
+    buf[3] = 0xff;                          // 模块地址错误
+    buf[4] = 0xff;                          // 模块地址错误
+    buf[5] = 0xff;                          // 模块地址错误
+
+    buf[6] = 0x01; // 命令包标识
+    buf[7] = 0x00; // 长度
+    buf[8] = 0x07; // 长度
+    buf[9] = 0x13; // 指令代码：0x13
+
+    //★ 默认口令为“0x00000000”。
+    buf[10] = 0x00;//四字节口令
+    buf[11] = 0x00;
+    buf[12] = 0x00;
+    buf[13] = 0x00;
+
+    //★ 指令包校验和(2 bytes)=包标识(1 byte)+包长度(2 bytes)+指令码(1 byte)+口令(4 bytes)；
+    sum.word = ZFM_GetSum((uchar*)&buf[6],8);// 计算数据校验和
+
+    buf[14]=sum.byte.high; 			 // 校验和
+    buf[15]=sum.byte.low;			 // 校验和
+/*
+    buf[0] = 0x5a;                          // 模块地址错误
+    buf[1] = 0x55;                          // 模块地址错误
+    buf[2] = 0x01;                          // 模块地址错误
+    buf[3] = 0x01;                          // 模块地址错误
+    buf[4] = 0x00;                          // 模块地址错误
+    buf[5] = 0x02;                          // 模块地址错误
+    buf[6] = 0x6a;                          // 模块地址错误
+    buf[7] = 0x69;                          // 模块地址错误
+    //5A 55 01 01 00 02 6A 69
+    */
+    //发送数据
+    myCom->write(buf,16);
+    //myCom->write(buf,8);
+    ui->statusBar->showMessage(tr("验证模块口令发送成功"));
+    //界面控制
+    ui->textBrowser->setTextColor(Qt::lightGray);
+
+}
+
+
+//7）读有效模板个数 TemplateNum
+//功能说明：读模块内已存储的指纹模板个数。
+//输入参数：none
+//返回参数：确认字 + 模板个数N
+//指令代码：0x1d
+void MainWindow::on_Btn_GetTemplateNum_clicked()
+{
+    my_word sum;       // 校验和
+    char *buf=ZFM_SendBuf;
+
+    if(openSerialPortFlag == 0)
+    {
+        QMessageBox::critical(this, tr("打开失败"), tr("请首先打开可以使用的串口！"), QMessageBox::Ok);
+        return ;
+    }
+    // 以下判断表示不处理非应答包数据
+    buf[0] = 0xef;                          // 包头错误
+    buf[1] = 0x01;                          // 包头错误
+
+    //★ 默认模块地址为“0xffffffff”
+    buf[2] = 0xff;                          // 模块地址错误
+    buf[3] = 0xff;                          // 模块地址错误
+    buf[4] = 0xff;                          // 模块地址错误
+    buf[5] = 0xff;                          // 模块地址错误
+
+    buf[6] = 0x01; // 命令包标识
+    buf[7] = 0x00; // 长度
+    buf[8] = 0x03; // 长度
+    buf[9] = 0x1d; // 指令代码：0x1d
+
+    //★ 指令包校验和(2 bytes)=包标识(1 byte)+包长度(2 bytes)+指令码(1 byte)
+    sum.word = ZFM_GetSum((uchar*)&buf[6],4);// 计算数据校验和
+
+    buf[10]=sum.byte.high; 			 // 校验和
+    buf[11]=sum.byte.low;			 // 校验和
+
+    //发送数据
+    myCom->write(buf,12);
+    ui->statusBar->showMessage(tr("读有效模板个数指令发送成功"));
+    //界面控制
+    ui->textBrowser->setTextColor(Qt::lightGray);
+
+}
+
+
+//功能说明：探测手指，探测到后录入指纹图像存于ImageBuffer，
+//并返回录入成功确认码；若探测不到手指，直接返回无手指确认码
+//(模块对于每一条指令都快速反应，因此如连续探测，需进行循环处理，可限定循环的次数或总时间)。
+//输入参数：none
+//返回参数：确认字
+//指令代码：0x01
+void MainWindow::on_pushButton_clicked()
+{
+    my_word sum;       // 校验和
+    char *buf=ZFM_SendBuf;
+
+    if(openSerialPortFlag == 0)
+    {
+        QMessageBox::critical(this, tr("打开失败"), tr("请首先打开可以使用的串口！"), QMessageBox::Ok);
+        return ;
+    }
+    // 以下判断表示不处理非应答包数据
+    buf[0] = 0xef;                          // 包头错误
+    buf[1] = 0x01;                          // 包头错误
+
+    //★ 默认模块地址为“0xffffffff”
+    buf[2] = 0xff;                          // 模块地址错误
+    buf[3] = 0xff;                          // 模块地址错误
+    buf[4] = 0xff;                          // 模块地址错误
+    buf[5] = 0xff;                          // 模块地址错误
+
+    buf[6] = 0x01; // 命令包标识
+    buf[7] = 0x00; // 长度
+    buf[8] = 0x03; // 长度
+    buf[9] = 0x01; // 指令代码：0x01
+
+    //★ 指令包校验和(2 bytes)=包标识(1 byte)+包长度(2 bytes)+指令码(1 byte)
+    sum.word = ZFM_GetSum((uchar*)&buf[6],4);// 计算数据校验和
+
+    buf[10]=sum.byte.high; 			 // 校验和
+    buf[11]=sum.byte.low;			 // 校验和
+
+    //发送数据
+    myCom->write(buf,12);
+    ui->statusBar->showMessage(tr("录指纹图像指令发送成功"));
+    //界面控制
+    ui->textBrowser->setTextColor(Qt::lightGray);
+}
+
+
+//9）上传图像 UpImage
+//功能说明：将模块图像缓冲区ImageBuffer中的数据上传给上位机（参见4.1.1图像缓冲区）。
+//输入参数：none
+//返回参数：确认字
+//指令代码：0x0a
+void MainWindow::on_pushButton_5_clicked()
+{
+    my_word sum;       // 校验和
+    char *buf=ZFM_SendBuf;
+
+    if(openSerialPortFlag == 0)
+    {
+        QMessageBox::critical(this, tr("打开失败"), tr("请首先打开可以使用的串口！"), QMessageBox::Ok);
+        return ;
+    }
+    // 以下判断表示不处理非应答包数据
+    buf[0] = 0xef;                          // 包头错误
+    buf[1] = 0x01;                          // 包头错误
+
+    //★ 默认模块地址为“0xffffffff”
+    buf[2] = 0xff;                          // 模块地址错误
+    buf[3] = 0xff;                          // 模块地址错误
+    buf[4] = 0xff;                          // 模块地址错误
+    buf[5] = 0xff;                          // 模块地址错误
+
+    buf[6] = 0x01; // 命令包标识
+    buf[7] = 0x00; // 长度
+    buf[8] = 0x03; // 长度
+    buf[9] = 0x0a; // 指令代码：0x0a
+
+    //★ 指令包校验和(2 bytes)=包标识(1 byte)+包长度(2 bytes)+指令码(1 byte)
+    sum.word = ZFM_GetSum((uchar*)&buf[6],4);// 计算数据校验和
+
+    buf[10]=sum.byte.high; 			 // 校验和
+    buf[11]=sum.byte.low;			 // 校验和
+
+    //发送数据
+    myCom->write(buf,12);
+    ui->statusBar->showMessage(tr("上传指纹图像指令发送成功"));
+    //界面控制
+    ui->textBrowser->setTextColor(Qt::lightGray);
+}
+
+//10）下载图像DownImage
+//功能说明：上位机下载图像数据到模块图像缓冲区ImageBuffer(参见4.1.1图像缓冲区），图像必须为256*288大小BMP格式。
+//输入参数：none
+//返回参数：确认字
+//指令代码：0x0b
+void MainWindow::on_pushButton_6_clicked()
+{
+
 }

@@ -1,11 +1,11 @@
 
 
-#include "ZFM903_COM.h"
+#include "zfm903_com.h"
 //#include "yoyon_types.h"
-#include "Lib_Define.h"
+//#include "Lib_Define.h"
 #include <string.h>
 #include <stdarg.h>
-
+//#include "mainwindow.h"
 
 uchar CharBuffer1[512],CharBuffer2[512];
 //uchar ImageBuffer[256*288];
@@ -20,12 +20,16 @@ uchar PWD_VERIFY_OK=0;
 
 int Comm_Send(uchar *p,uint len)
 {
-    return uart_send(p,len);
+    ///return uart_send(p,len);
+
+    //ui->Com_Send((char *)p,len);
+
+
 }
 
 int Comm_Recv(uchar* data,uint len,uint timeout)
 {
-   return Com_UartGetData(data,len,timeout);
+   ///return Com_UartGetData(data,len,timeout);
 }
 
 
@@ -206,30 +210,13 @@ uchar ECHO_Pro(void)
 
 
 
-//=============================================================//
-void uart_print(const char * fmt, ...)
-{
-#if 1
-
-    va_list ap;
-    //char string[512];
-    char string[256];
-
-    va_start(ap,fmt);
-    vsprintf(string,fmt,ap);
-    //gpio_set_pin_level(GPIO_485_TXEN, 1);
-    uart_send(string,strlen(string));
-    //gpio_set_pin_level(GPIO_485_TXEN, 0);
-    va_end(ap);
-#endif
-}
 
 
 uchar ZFM903_CmdPro(void)
 {
     int len;
 
-    SystemInfoLoad();
+    ///SystemInfoLoad();
     //FLASH_TEST();
 
     while(1)
@@ -238,10 +225,135 @@ uchar ZFM903_CmdPro(void)
         if(len)
         {
             //DEBUG_PRINT("len=%d,data[0]=%d,data[%d]=%d\r\n",len,ZFM903_RecvBuf[0],len-1,ZFM903_RecvBuf[len-1]);
-            store_all_int();
-            ZFM903_CmdComm(ZFM903_RecvBuf,len);
-            restore_all_int();
+            //store_all_int();
+            ///ZFM903_CmdComm(ZFM903_RecvBuf,len);
+            ///restore_all_int();
         }
     }
 
 }
+
+
+/////////////////////////////////////////////////////////////////////
+//1）验证口令 VfyPwd
+//功能说明：验证模块口令（串行通讯必须进行的握手）。
+//输入参数：PassWord
+//返回参数：确认码
+//指令代码：0x13
+
+//★ 应答包校验和(2 bytes)=包标识(1 byte)+包长度(2 bytes)+确认码(1 byte)；
+//★ 校验和以字节相加，超过2 字节的进位忽略，传送时高字节在前；
+void CMD_Send_VfyPwd(void)
+{
+    my_word sum;       // 校验和
+    uchar *buf=ZFM903_SendBuf;
+
+    // 以下判断表示不处理非应答包数据
+    buf[0] = 0xef;                          // 包头错误
+    buf[1] = 0x01;                          // 包头错误
+
+    //★ 默认模块地址为“0xffffffff”
+    buf[2] = 0xff;                          // 模块地址错误
+    buf[3] = 0xff;                          // 模块地址错误
+    buf[4] = 0xff;                          // 模块地址错误
+    buf[5] = 0xff;                          // 模块地址错误
+
+    buf[6] = 0x01; // 命令包标识
+    buf[7] = 0x00; // 长度
+    buf[8] = 0x07; // 长度
+    buf[9] = 0x13; // 指令代码：0x13
+
+    //★ 默认口令为“0x00000000”。
+    buf[10] = 0x00;//四字节口令
+    buf[11] = 0x00;
+    buf[12] = 0x00;
+    buf[13] = 0x00;
+
+    //★ 指令包校验和(2 bytes)=包标识(1 byte)+包长度(2 bytes)+指令码(1 byte)+口令(4 bytes)；
+    sum.word = ZFM903_GetSum((uchar*)&buf[6],8);// 计算数据校验和
+
+    buf[14]=sum.byte.high; 			 // 校验和
+    buf[15]=sum.byte.low;			 // 校验和
+
+    Comm_Send(buf,16);
+
+}
+
+
+//2）设置口令 SetPwd
+//功能说明：设置模块口令（参见4.6模块口令）。
+//输入参数：PassWord
+//返回参数：确认字
+//指令代码：0x12
+
+
+
+//3） 设置模块地址 SetAddr
+//功能说明：设置模块地址（参见4.7 模块地址）。
+//输入参数：模块新地址（如遗忘地址，发送一条默认地址的正确指令，即可获得新地址）
+//返回参数：确认字
+//指令代码：0x15
+
+
+//4）设置模块系统基本参数 SetSysPara
+//功能说明：基本参数设置（参见4.4 系统配置参数）。
+//输入参数：参数序号 + 内容
+//返回参数：确认字
+//指令代码：0x0e
+
+
+//5）读系统参数 ReadSysPara
+//功能说明：读取模块的状态寄存器和系统基本配置参数（参见4.4系统配置参数和4.5系统状态寄存器）。
+//输入参数：none
+//返回参数：确认字 + 基本参数
+//指令代码：0x0f
+
+
+//6) 读指纹模板索引表 ReadConList
+//功能说明：读取模块指纹模板索引表，且每次最多读取256个指纹模板的索引表。
+//输入参数：索引页
+//索引页0代表读取0～255 指纹模板索引表
+//索引页1代表读取256～511 指纹模板索引表
+//索引页2代表读取512～767 指纹模板索引表
+//索引页3代表读取768～1024指纹模板索引表
+//返回参数：确认字 + 指纹模板索引表
+//指令代码：0x1f
+
+
+//7）读有效模板个数 TemplateNum
+//功能说明：读模块内已存储的指纹模板个数。
+//输入参数：none
+//返回参数：确认字 + 模板个数N
+//指令代码：0x1d
+void CMD_Send_Get_TemplateNum(void)
+{
+    my_word sum;       // 校验和
+    uchar *buf=ZFM903_SendBuf;
+
+    // 以下判断表示不处理非应答包数据
+    buf[0] = 0xef;                          // 包头错误
+    buf[1] = 0x01;                          // 包头错误
+
+    //★ 默认模块地址为“0xffffffff”
+    buf[2] = 0xff;                          // 模块地址错误
+    buf[3] = 0xff;                          // 模块地址错误
+    buf[4] = 0xff;                          // 模块地址错误
+    buf[5] = 0xff;                          // 模块地址错误
+
+    buf[6] = 0x01; // 命令包标识
+    buf[7] = 0x00; // 长度
+    buf[8] = 0x03; // 长度
+    buf[9] = 0x1d; // 指令代码：0x1d
+
+    //★ 指令包校验和(2 bytes)=包标识(1 byte)+包长度(2 bytes)+指令码(1 byte)
+    sum.word = ZFM903_GetSum((uchar*)&buf[6],4);// 计算数据校验和
+
+    buf[10]=sum.byte.high; 			 // 校验和
+    buf[11]=sum.byte.low;			 // 校验和
+
+    Comm_Send(buf,12);
+}
+
+
+
+
