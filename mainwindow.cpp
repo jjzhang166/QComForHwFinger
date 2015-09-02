@@ -876,6 +876,7 @@ char MainWindow::ZFM903_SendCMD(uchar cmd,char data1,uint data2,uint data3)
         myCom->write(pbuf,12);
         break;
     }
+    return 1;
 }
 //1）验证口令 VfyPwd
 //功能说明：验证模块口令（串行通讯必须进行的握手）。
@@ -884,7 +885,10 @@ char MainWindow::ZFM903_SendCMD(uchar cmd,char data1,uint data2,uint data3)
 //指令代码：0x13
 void MainWindow::on_Btn_VfyPwd_clicked()
 {
-    ZFM903_SendCMD(CMD_VFY_PWD,0,0,0);
+    if(ZFM903_SendCMD(CMD_VFY_PWD,0,0,0)==0)
+    {
+        return ;
+    }
     ui->statusBar->showMessage(tr("验证模块口令发送成功"));
     //界面控制
     ui->textBrowser->setTextColor(Qt::lightGray);
@@ -896,7 +900,11 @@ void MainWindow::on_Btn_VfyPwd_clicked()
 //指令代码：0x1d
 void MainWindow::on_Btn_GetTemplateNum_clicked()
 {
-    ZFM903_SendCMD(CMD_GET_TEMPLATE_NUM,0,0,0);
+    //ZFM903_SendCMD(CMD_GET_TEMPLATE_NUM,0,0,0);
+    if(ZFM903_SendCMD(CMD_GET_TEMPLATE_NUM,0,0,0)==0)
+    {
+        return ;
+    }
     ui->statusBar->showMessage(tr("读有效模板个数指令发送成功"));
     //界面控制
     ui->textBrowser->setTextColor(Qt::lightGray);
